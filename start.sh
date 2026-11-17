@@ -1,6 +1,9 @@
 #!/usr/bin/env sh
 set -e
 
+# Wir wechseln direkt in den App-Ordner, damit alles am selben Ort ist
+cd /app
+
 echo "DEBUG: DISCORD_TOKEN Laenge ist: ${#DISCORD_TOKEN}"
 
 if [ -z "$DISCORD_TOKEN" ] || [ -z "$OWNER_ID" ]; then
@@ -8,7 +11,7 @@ if [ -z "$DISCORD_TOKEN" ] || [ -z "$OWNER_ID" ]; then
   exit 1
 fi
 
-# Wir schreiben die config.txt absolut sauber im aktuellen Ordner (.)
+# config.txt direkt in /app schreiben
 printf 'discordtoken = "%s"\n' "$DISCORD_TOKEN" > config.txt
 printf 'owner = %s\n' "$OWNER_ID" >> config.txt
 printf 'prefix = "%s"\n' "${PREFIX:-!}" >> config.txt
@@ -23,13 +26,12 @@ printf 'updatealerts = false\n' >> config.txt
 printf 'loglevel = info\n' >> config.txt
 printf 'eval = false\n' >> config.txt
 
-echo "Inhalt der erzeugten config.txt (erste 2 Zeilen):"
-head -n 2 config.txt
+echo "config.txt wurde in /app erstellt."
 
-# Mini-Webserver für Render im Hintergrund starten
+# Mini-Webserver im Hintergrund starten (damit Render glücklich ist)
 mkdir -p /app/health
 echo "Music Bot laeuft" > /app/health/index.html
 python3 -m http.server "${PORT:-10000}" --directory /app/health > /dev/null 2>&1 &
 
-# JMusicBot starten (er sucht automatisch nach config.txt im aktuellen Ordner)
-exec java -Xmx${JAVA_XMX:-300m} -Dnogui=true -jar /app/JMusicBot.jar
+# JMusicBot aus dem /app Ordner heraus starten
+exec java -Xmx${JAVA_XMX:-300m} -Dnogui=true -jar JMusicBot.jar
