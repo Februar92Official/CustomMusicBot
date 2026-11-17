@@ -8,35 +8,28 @@ if [ -z "$DISCORD_TOKEN" ] || [ -z "$OWNER_ID" ]; then
   exit 1
 fi
 
-# Fallback-Werte sauber in reinen Variablen vorbereiten (vermeidet den ':' in der Config)
-ALONE_VAL="${ALONE_TIME:-60}"
-PREFIX_VAL="${PREFIX:-!}"
-GAME_VAL="${GAME:-DEFAULT}"
-JAVA_MEM="${JAVA_XMX:-300m}"
+# Wir schreiben die config.txt absolut sauber im aktuellen Ordner (.)
+printf 'discordtoken = "%s"\n' "$DISCORD_TOKEN" > config.txt
+printf 'owner = %s\n' "$OWNER_ID" >> config.txt
+printf 'prefix = "%s"\n' "${PREFIX:-!}" >> config.txt
+printf 'game = "%s"\n' "${GAME:-DEFAULT}" >> config.txt
+printf 'status = ONLINE\n' >> config.txt
+printf 'songinstatus = false\n' >> config.txt
+printf 'stayinchannel = false\n' >> config.txt
+printf 'alonetimeuntilstop = %s\n' "${ALONE_TIME:-60}" >> config.txt
+printf 'maxtime = 0\n' >> config.txt
+printf 'skipratio = 0.55\n' >> config.txt
+printf 'updatealerts = false\n' >> config.txt
+printf 'loglevel = info\n' >> config.txt
+printf 'eval = false\n' >> config.txt
 
-# config.txt komplett sauber ohne ':' im Dateiinhalt erzeugen
-cat << EOF > /app/config.txt
-discordtoken = "$DISCORD_TOKEN"
-owner = $OWNER_ID
-prefix = "$PREFIX_VAL"
-game = "$GAME_VAL"
-status = ONLINE
-songinstatus = false
-stayinchannel = false
-alonetimeuntilstop = $ALONE_VAL
-maxtime = 0
-skipratio = 0.55
-updatealerts = false
-loglevel = info
-eval = false
-EOF
-
-echo "config.txt wurde fehlerfrei generiert."
+echo "Inhalt der erzeugten config.txt (erste 2 Zeilen):"
+head -n 2 config.txt
 
 # Mini-Webserver für Render im Hintergrund starten
 mkdir -p /app/health
 echo "Music Bot laeuft" > /app/health/index.html
 python3 -m http.server "${PORT:-10000}" --directory /app/health > /dev/null 2>&1 &
 
-# JMusicBot mit der Config starten
-exec java -Xmx${JAVA_MEM} -Dnogui=true -jar /app/JMusicBot.jar /app/config.txt
+# JMusicBot starten (er sucht automatisch nach config.txt im aktuellen Ordner)
+exec java -Xmx${JAVA_XMX:-300m} -Dnogui=true -jar /app/JMusicBot.jar
