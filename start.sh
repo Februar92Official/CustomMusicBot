@@ -12,25 +12,26 @@ if [ -z "$OWNER_ID" ]; then
   exit 1
 fi
 
-# config.txt explizit schreiben
-echo "discordtoken = \"$DISCORD_TOKEN\"" > config.txt
-echo "owner = $OWNER_ID" >> config.txt
-echo "prefix = \"${PREFIX:-!}\"" >> config.txt
-echo "game = \"${GAME:-DEFAULT}\"" >> config.txt
-echo "status = ONLINE" >> config.txt
-echo "songinstatus = false" >> config.txt
-echo "stayinchannel = false" >> config.txt
-echo "alonetimeuntilstop = ${ALONE_TIME:-60}" >> config.txt
-echo "maxtime = 0" >> config.txt
-echo "skipratio = 0.55" >> config.txt
-echo "updatealerts = false" >> config.txt
-echo "loglevel = info" >> config.txt
-echo "eval = false" >> config.txt
+# config.txt schreiben (mit direktem Variablen-Einsatz)
+cat << EOF > config.txt
+discordtoken = "$DISCORD_TOKEN"
+owner = $OWNER_ID
+prefix = "${PREFIX:-!}"
+game = "${GAME:-DEFAULT}"
+status = ONLINE
+songinstatus = false
+stayinchannel = false
+alonetimeuntilstop = ${ALONE_TIME:-60}
+maxtime = 0
+skipratio = 0.55
+updatealerts = false
+loglevel = info
+eval = false
+EOF
 
-echo "Generierte config.txt Inhalt (ohne Token):"
-grep -v "discordtoken" config.txt
+echo "config.txt wurde erfolgreich generiert."
 
-# Mini-Webserver für Render starten
+# Mini-Webserver für Render im Hintergrund starten
 mkdir -p /app/health
 echo "Music Bot laeuft" > /app/health/index.html
 python3 -m http.server "${PORT:-10000}" --directory /app/health > /dev/null 2>&1 &
