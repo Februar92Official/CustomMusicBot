@@ -1,7 +1,6 @@
 #!/usr/bin/env sh
 set -e
 
-# Wir wechseln direkt in den App-Ordner, damit alles am selben Ort ist
 cd /app
 
 echo "DEBUG: DISCORD_TOKEN Laenge ist: ${#DISCORD_TOKEN}"
@@ -11,27 +10,25 @@ if [ -z "$DISCORD_TOKEN" ] || [ -z "$OWNER_ID" ]; then
   exit 1
 fi
 
-# config.txt direkt in /app schreiben
-printf 'discordtoken = "%s"\n' "$DISCORD_TOKEN" > config.txt
-printf 'owner = %s\n' "$OWNER_ID" >> config.txt
-printf 'prefix = "%s"\n' "${PREFIX:-!}" >> config.txt
-printf 'game = "%s"\n' "${GAME:-DEFAULT}" >> config.txt
+# Minimale config.txt erzeugen (damit andere Settings wie Owner geladen werden)
+printf 'owner = %s\n' "$OWNER_ID" > config.txt
+printf 'prefix = "!"\n' >> config.txt
 printf 'status = ONLINE\n' >> config.txt
 printf 'songinstatus = false\n' >> config.txt
 printf 'stayinchannel = false\n' >> config.txt
-printf 'alonetimeuntilstop = %s\n' "${ALONE_TIME:-60}" >> config.txt
+printf 'alonetimeuntilstop = 60\n' >> config.txt
 printf 'maxtime = 0\n' >> config.txt
 printf 'skipratio = 0.55\n' >> config.txt
 printf 'updatealerts = false\n' >> config.txt
 printf 'loglevel = info\n' >> config.txt
 printf 'eval = false\n' >> config.txt
 
-echo "config.txt wurde in /app erstellt."
+echo "config.txt wurde erstellt."
 
-# Mini-Webserver im Hintergrund starten (damit Render glücklich ist)
+# Mini-Webserver für Render im Hintergrund starten
 mkdir -p /app/health
 echo "Music Bot laeuft" > /app/health/index.html
 python3 -m http.server "${PORT:-10000}" --directory /app/health > /dev/null 2>&1 &
 
-# JMusicBot aus dem /app Ordner heraus starten
-exec java -Xmx${JAVA_XMX:-300m} -Dnogui=true -jar JMusicBot.jar
+# JMusicBot starten und den Token direkt als Argument zwingend übergeben
+exec java -Xmx${JAVA_XMX:-300m} -Dnogui=true -jar JMusicBot.jar "$DISCORD_TOKEN"
