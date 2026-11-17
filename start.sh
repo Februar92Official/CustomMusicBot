@@ -1,12 +1,12 @@
-#!/bin/sh
+#!/usr/bin/env sh
 set -e
 
 : "${DISCORD_TOKEN:?DISCORD_TOKEN fehlt (Umgebungsvariable)}"
 : "${OWNER_ID:?OWNER_ID fehlt (Umgebungsvariable)}"
 
-# config.txt aus Umgebungsvariablen erzeugen, damit der Token nie im Repo steht
+# config.txt aus Umgebungsvariablen erzeugen
 cat > config.txt << CONFIG
-token = "${DISCORD_TOKEN}"
+discordtoken = "${DISCORD_TOKEN}"
 owner = ${OWNER_ID}
 prefix = "${PREFIX:-!}"
 game = "${GAME:-DEFAULT}"
@@ -21,10 +21,10 @@ loglevel = info
 eval = false
 CONFIG
 
-# Mini-Webserver: Render braucht einen offenen Port, UptimeRobot pingt ihn an
+# Mini-Webserver für Render und UptimeRobot
 mkdir -p /app/health
 echo "Music Bot laeuft" > /app/health/index.html
 python3 -m http.server "${PORT:-10000}" --directory /app/health > /dev/null 2>&1 &
 
-# JVM-Speicher begrenzen (Render Free hat nur 512 MB RAM)
+# JVM-Speicher begrenzen und JMusicBot starten
 exec java -Xmx${JAVA_XMX:-300m} -Dnogui=true -jar /app/JMusicBot.jar
