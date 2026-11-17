@@ -1,18 +1,20 @@
 #!/usr/bin/env sh
 set -e
 
+echo "DEBUG: DISCORD_TOKEN Laenge ist: ${#DISCORD_TOKEN}"
+
 # Prüfen, ob die Variablen da sind
 if [ -z "$DISCORD_TOKEN" ]; then
-  echo "FEHLER: DISCORD_TOKEN ist nicht gesetzt!"
+  echo "FEHLER: DISCORD_TOKEN ist in Render leer oder nicht gesetzt!"
   exit 1
 fi
 
 if [ -z "$OWNER_ID" ]; then
-  echo "FEHLER: OWNER_ID ist nicht gesetzt!"
+  echo "FEHLER: OWNER_ID ist in Render leer oder nicht gesetzt!"
   exit 1
 fi
 
-# config.txt schreiben (mit direktem Variablen-Einsatz)
+# config.txt explizit schreiben
 cat << EOF > config.txt
 discordtoken = "$DISCORD_TOKEN"
 owner = $OWNER_ID
@@ -29,7 +31,7 @@ loglevel = info
 eval = false
 EOF
 
-echo "config.txt wurde erfolgreich generiert."
+echo "config.txt wurde geschrieben."
 
 # Mini-Webserver für Render im Hintergrund starten
 mkdir -p /app/health
